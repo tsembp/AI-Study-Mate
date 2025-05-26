@@ -1,0 +1,13 @@
+streamlit
+langchain
+openai
+faiss-cpu
+chromadb
+tiktoken
+python-dotenv
+PyPDF2
+docx2txt
+unstructured
+beautifulsoup4
+pymupdf
+sentence-transformers
