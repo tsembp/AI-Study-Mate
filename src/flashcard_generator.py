@@ -1,7 +1,7 @@
 import os
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain_community.llms import HuggingFaceHub
+from langchain_community.llms import HuggingFaceHub, OpenAI
 
 def generate_flashcards(vector_db, num_cards=10):
     # Get content from the vector database
@@ -38,9 +38,9 @@ def generate_flashcards(vector_db, num_cards=10):
     """
     
     # Set up the LLM chain
-    llm = HuggingFaceHub(
-        repo_id = "tiiuae/falcon-7b-instruct",
-        model_kwargs={"temperature": 0.5, "max_new_tokens": 256},
+    llm = OpenAI(
+        temperature=0.5,
+        model_name="gpt-3.5-turbo-instruct"
     )
 
     
