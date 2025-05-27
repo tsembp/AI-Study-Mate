@@ -2,6 +2,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_community.llms import HuggingFaceHub
 
+
 def get_quiz_prompt():
     template = """
     Based on the following study text, create a multiple choice question to test the knowledge of a student.
@@ -25,6 +26,9 @@ def get_quiz_prompt():
 
 def generate_mcq(context: str):
     prompt = get_quiz_prompt()
-    llm = HuggingFaceHub(temperature=0.7)
+    llm = HuggingFaceHub(
+        repo_id="google/flan-t5-base",
+        model_kwargs={"temperature": 0.5},
+    )
     chain = LLMChain(llm=llm, prompt=prompt)
     return chain.run(context=context)
