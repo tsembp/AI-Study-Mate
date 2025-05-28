@@ -1,7 +1,6 @@
 import os
-from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain_community.llms import HuggingFaceHub, OpenAI
+from langchain_openai import ChatOpenAI
 
 def generate_flashcards(vector_db, num_cards=10):
     # Get content from the vector database
@@ -20,12 +19,12 @@ def generate_flashcards(vector_db, num_cards=10):
     
     ANSWER FORMAT:
     Return a list of exactly {num_cards} flashcards with consistent formatting.
+    Don't include any other messages like "Here's a list...". Just include only the flashcards in the format explained below.
     Each flashcard should be in the format:
     Q: [Question/Term] (front side)
     A: [Answer/Definition] (back side)
     
     EXAMPLE OUTPUT:
-    FLASHCARDS:
 
     Q: What is photosynthesis?
     A: The process by which green plants and some other organisms convert light energy into chemical energy. Plants use sunlight, water, and carbon dioxide to produce oxygen and glucose.
@@ -38,9 +37,9 @@ def generate_flashcards(vector_db, num_cards=10):
     """
     
     # Set up the LLM chain
-    llm = OpenAI(
+    llm = ChatOpenAI(
+        model="gpt-3.5-turbo",
         temperature=0.5,
-        model_name="gpt-3.5-turbo-instruct"
     )
 
     
@@ -49,15 +48,15 @@ def generate_flashcards(vector_db, num_cards=10):
         template=flashcard_template
     )
     
-    chain = LLMChain(llm=llm, prompt=prompt)
-    
-    # Generate flashcards
-    response = chain.run(content=content, num_cards=num_cards)
+    chain = prompt | llm
+    response = chain.invoke({"content": content, "num_cards": num_cards})
+
+    print("LLM RAW RESPONSE:\n", response)
     
     # Parse the response into a structured format
     flashcards = []
-    raw_cards = response.strip().split("\n\n")
-    
+    raw_cards = response.content.strip().split("\n\n")
+
     for card in raw_cards:
         if not card.strip():
             continue
@@ -74,4 +73,13 @@ def generate_flashcards(vector_db, num_cards=10):
             "back": answer
         })
     
+    if flashcards:
+        print('Flashcards NOT EMPTY\n')
+        for i, entry in enumerate(flashcards):
+            print(f'Flashcard {i}')
+            print(f'Front: {entry["front"]}\n')
+            print(f'Back: {entry["back"]}\n')
+    else:
+        print('Flashcards EMPTY\n')
+
     return flashcards

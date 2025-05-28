@@ -25,6 +25,10 @@ if 'current_card_index' not in st.session_state:
     st.session_state.current_card_index = 0
 if 'show_answer' not in st.session_state:
     st.session_state.show_answer = False
+if 'file_already_uploaded' not in st.session_state:
+    st.session_state.file_already_uploaded = False
+if 'current_filename' not in st.session_state:
+    st.session_state.current_filename = None
 
 st.set_page_config(page_title="AI StudyMate", layout="wide")
 
@@ -39,14 +43,22 @@ st.write('')
 uploaded_file = st.file_uploader("Upload a study file (.pdf or .docx)", type = ["pdf", "docx"])
 
 if uploaded_file:
+    new_file_uploaded = False
+    
+    # Check file uploaded is new
+    if st.session_state.current_filename != uploaded_file.name:
+        st.session_state.current_filename = uploaded_file.name
+        new_file_uploaded = True
+    
     if not os.path.exists("data"):
         os.makedirs("data")
 
     save_path = os.path.join("data", uploaded_file.name)
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
-
-    st.toast(f"Uploaded file: {uploaded_file.name}", icon="ℹ️")
+    
+    if new_file_uploaded:
+        st.toast(f"Uploaded file: {uploaded_file.name}", icon="ℹ️")
 
     # Load & parse document
     try:
@@ -170,6 +182,23 @@ if st.session_state.study_mode_selected == True:
             if st.session_state.current_card_index >= len(st.session_state.flashcards):
                 st.session_state.current_card_index = 0
             
+            # Define callback functions for buttons
+            def show_answer():
+                st.session_state.show_answer = True
+                
+            def hide_answer():
+                st.session_state.show_answer = False
+                
+            def next_card():
+                if st.session_state.current_card_index < len(st.session_state.flashcards) - 1:
+                    st.session_state.current_card_index += 1
+                    st.session_state.show_answer = False
+                
+            def prev_card():
+                if st.session_state.current_card_index > 0:
+                    st.session_state.current_card_index -= 1
+                    st.session_state.show_answer = False
+            
             card_container = st.container(border=True)
             with card_container:
                 current_card = st.session_state.flashcards[st.session_state.current_card_index]
@@ -186,28 +215,29 @@ if st.session_state.study_mode_selected == True:
             col1, col2, col3 = st.columns([1, 2, 1], gap="large")
             
             with col1:
-                if st.button("⬅️ Previous", key="prev_btn", disabled=st.session_state.current_card_index == 0, use_container_width=True):
-                    st.session_state.current_card_index -= 1
-                    st.session_state.show_answer = False
-                    st.rerun()
+                st.button("⬅️ Previous", key="prev_btn", 
+                         on_click=prev_card,
+                         disabled=st.session_state.current_card_index == 0, 
+                         use_container_width=True)
             
             with col2:
                 if st.session_state.show_answer:
-                    if st.button("🙈 Hide Answer", key="hide_btn", use_container_width=True):
-                        st.session_state.show_answer = False
-                        st.rerun()
+                    st.button("🙈 Hide Answer", key="hide_btn", 
+                             on_click=hide_answer,
+                             use_container_width=True)
                 else:
-                    if st.button("👀 Show Answer", key="show_btn", use_container_width=True):
-                        st.session_state.show_answer = True
-                        st.rerun()
+                    st.button("👀 Show Answer", key="show_btn", 
+                             on_click=show_answer,
+                             use_container_width=True)
             
             with col3:
-                if st.button("Next ➡️", key="next_btn", disabled=st.session_state.current_card_index == len(st.session_state.flashcards) - 1, use_container_width=True):
-                    st.session_state.current_card_index += 1
-                    st.session_state.show_answer = False
-                    st.rerun()
+                st.button("Next ➡️", key="next_btn", 
+                         on_click=next_card,
+                         disabled=st.session_state.current_card_index == len(st.session_state.flashcards) - 1, 
+                         use_container_width=True)
         else:
             st.info("Click 'Generate Flashcards' to create flashcards from your notes!")
+
 
     # quiz selected
     elif st.session_state.selected_mode == "quiz":
