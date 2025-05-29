@@ -1,5 +1,8 @@
 import os
-from langchain.prompts import PromptTemplate
+import json
+from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain.prompts.chat import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+
 from langchain_openai import ChatOpenAI
 
 def generate_flashcards(vector_db, num_cards=8):
@@ -10,30 +13,27 @@ def generate_flashcards(vector_db, num_cards=8):
     content = " ".join([doc.page_content for doc in docs])
     
     # Create a prompt template for flashcard generation
-    flashcard_template = """
-    Based on the following study content, generate {num_cards} flashcards for studying.
-    Each flashcard should have a clear question/term on the front and a concise answer/definition on the back.
-    
+    system_template = """
+    You are an assistant generating study material. Follow these formatting rules strictly:
+    - Generate {num_cards} flashcards.
+    - Each should have a front and back side.
+    - Do NOT add explanations.
+    - Format the output **exactly** as shown:
+
+    Return output as a JSON list of objects in the following format:
+
+    [
+        {{
+            "front": "What is...",
+            "back": "It is..."
+        }},
+        ...
+    ]
+    """
+
+    human_template = """
     STUDY CONTENT:
     {content}
-    
-    ANSWER FORMAT:
-    Return a list of exactly {num_cards} flashcards with consistent formatting.
-    Don't include any other messages like "Here's a list...". Just include only the flashcards in the format explained below.
-    Each flashcard should be in the format:
-    Q: [Question/Term] (front side)
-    A: [Answer/Definition] (back side)
-    
-    EXAMPLE OUTPUT:
-
-    Q: What is photosynthesis?
-    A: The process by which green plants and some other organisms convert light energy into chemical energy. Plants use sunlight, water, and carbon dioxide to produce oxygen and glucose.
-    
-    Q: Define the term "mitosis"
-    A: A type of cell division in which a single cell divides into two identical daughter cells, each containing the same number of chromosomes as the parent cell.
-    
-    Q: What is the law of conservation of energy?
-    A: Energy cannot be created or destroyed, only transformed from one form to another. The total amount of energy in an isolated system remains constant.
     """
     
     # Set up the LLM chain
@@ -42,35 +42,18 @@ def generate_flashcards(vector_db, num_cards=8):
         temperature=0.5,
     )
 
-    
-    prompt = PromptTemplate(
-        input_variables=["content", "num_cards"],
-        template=flashcard_template
-    )
+    prompt = ChatPromptTemplate.from_messages([
+        SystemMessagePromptTemplate.from_template(system_template),
+        HumanMessagePromptTemplate.from_template(human_template)
+    ])
     
     chain = prompt | llm
     response = chain.invoke({"content": content, "num_cards": num_cards})
 
     print("LLM RAW RESPONSE:\n", response)
     
-    # Parse the response into a structured format
     flashcards = []
-    raw_cards = response.content.strip().split("\n\n")
+    raw_cards = response.content.strip()
+    flashcards = json.loads(raw_cards)
 
-    for card in raw_cards:
-        if not card.strip():
-            continue
-            
-        parts = card.strip().split("\nA: ")
-        if len(parts) != 2:
-            continue
-            
-        question = parts[0].replace("Q: ", "").strip()
-        answer = parts[1].strip()
-        
-        flashcards.append({
-            "front": question,
-            "back": answer
-        })
-    
     return flashcards

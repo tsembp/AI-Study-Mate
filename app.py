@@ -244,45 +244,11 @@ if st.session_state.study_mode_selected == True:
             if generate_mcqs_btn:
                 with st.spinner("Generating flashcards from your notes..."):
                     # Generate mcqs
-                    # st.session_state.questions = generate_mcqs(
-                    #    num_mcqs = num_mcqs
-                    # )  st.session_state.vector_db,
-                    #    
-
-                    # Dummy mcqs for testing
-                    st.session_state.questions = [
-                        {
-                            "question": "What is the primary function of mitochondria in a cell?",
-                            "options": {
-                                "A": "Generate ATP through cellular respiration",
-                                "B": "Protein synthesis",
-                                "C": "Storage of genetic material",
-                                "D": "Cell division"
-                            },
-                            "correct_option": "A"
-                        },
-                        {
-                            "question": "Which programming paradigm emphasizes the use of functions and avoids changing state?",
-                            "options": {
-                                "A": "Object-oriented programming",
-                                "B": "Functional programming",
-                                "C": "Procedural programming",
-                                "D": "Event-driven programming"
-                            },
-                            "correct_option": "B"
-                        },
-                        {
-                            "question": "In the context of databases, what does ACID stand for?",
-                            "options": {
-                                "A": "Atomicity, Consistency, Isolation, Durability",
-                                "B": "Adaptive Computing in Databases",
-                                "C": "Automatic Connection and Information Distribution",
-                                "D": "Array, Collection, Integration, and Distribution"
-                            },
-                            "correct_option": "A"
-                        }
-                    ]
-                
+                    st.session_state.questions = generate_mcqs(
+                        st.session_state.vector_db,
+                        num_mcqs = num_mcqs
+                    )  
+                       
                 st.session_state.mcqs_generated = True
                 st.toast("MCQs generated!", icon="✨")
 
