@@ -1,0 +1,50 @@
+# Dummy flashcards for testing 
+st.session_state.flashcards = [
+    {
+        "front": "What is the Pythagorean theorem?",
+        "back": "The Pythagorean theorem states that in a right triangle, the square of the length of the hypotenuse equals the sum of squares of the other two sides: a² + b² = c²."
+    },
+    {
+        "front": "What is Newton's First Law of Motion?",
+        "back": "An object at rest stays at rest, and an object in motion stays in motion at constant speed and direction, unless acted upon by an unbalanced force."
+    },
+    {
+        "front": "What is photosynthesis?",
+        "back": "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods with carbon dioxide and water, generating oxygen as a byproduct."
+    },
+    {
+        "front": "What is the capital of France?",
+        "back": "Paris is the capital of France."
+    }
+]
+
+# Dummy mcqs for testing
+st.session_state.questions = [
+    {
+        "question": "What is the primary function of mitochondria in a cell?",
+        "options": {
+            "A": "Generate ATP through cellular respiration",
+            "B": "Protein synthesis",
+            "C": "Storage of genetic material",
+            "D": "Cell division"
+        }
+    },
+    {
+        "question": "Which programming paradigm emphasizes the use of functions and avoids changing state?",
+        "options": {
+            "A": "Object-oriented programming",
+            "B": "Functional programming",
+            "C": "Procedural programming",
+            "D": "Event-driven programming"
+        }
+    },
+    {
+        "question": "In the context of databases, what does ACID stand for?",
+        "options": {
+            "A": "Atomicity, Consistency, Isolation, Durability",
+            "B": "Adaptive Computing in Databases",
+            "C": "Automatic Connection and Information Distribution",
+            "D": "Array, Collection, Integration, and Distribution"
+        }
+    }
+]

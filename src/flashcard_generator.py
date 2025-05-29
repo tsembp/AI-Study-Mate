@@ -2,7 +2,7 @@ import os
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
-def generate_flashcards(vector_db, num_cards=10):
+def generate_flashcards(vector_db, num_cards=8):
     # Get content from the vector database
     retriever = vector_db.as_retriever(search_kwargs={"k": 5})
     docs = retriever.get_relevant_documents("generate comprehensive flashcards")
@@ -73,13 +73,4 @@ def generate_flashcards(vector_db, num_cards=10):
             "back": answer
         })
     
-    if flashcards:
-        print('Flashcards NOT EMPTY\n')
-        for i, entry in enumerate(flashcards):
-            print(f'Flashcard {i}')
-            print(f'Front: {entry["front"]}\n')
-            print(f'Back: {entry["back"]}\n')
-    else:
-        print('Flashcards EMPTY\n')
-
     return flashcards
