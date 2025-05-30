@@ -1,11 +1,15 @@
 import streamlit as st
 import os
+import base64
 from src.document_loader import load_document
 from src.chunk_and_embed import chunk_documents, embed_and_store
 from dotenv import load_dotenv
 import torch
 from src.quiz_generator import generate_mcqs
 from src.flashcard_generator import generate_flashcards
+from src.summarizer import summarize_document
+from datetime import datetime
+from src.dummy_data import generate_dummy_pdf
 
 torch._C._jit_set_profiling_mode(False)
 load_dotenv()
@@ -131,9 +135,9 @@ with st.container():
         with qa_card:
             st.markdown("### 📋 Summarize")
             st.markdown("Generate document with summary of notes.")
-            if st.button("Start Summarizing", key="summarize"):
+            if st.button("Start Summarizing", key="summarize_btn"):
                 if st.session_state.document_processed and st.session_state.vector_db is not None:
-                    st.session_state.selected_mode = "summarize_btn "
+                    st.session_state.selected_mode = "summarize"
                     st.session_state.study_mode_selected = True
                 else:
                     st.toast("Please upload and process a document first.", icon="⚠️")
@@ -337,4 +341,38 @@ if st.session_state.study_mode_selected == True:
     # summarize selected
     elif st.session_state.selected_mode == "summarize":
         st.subheader("📋 Summarize Document Generator", divider="green")
-        st.info("Summarize feature is coming soon!")
+
+        if 'summary' not in st.session_state:
+            st.session_state.summary = None
+        if 'summary_pdf_path' not in st.session_state:
+            st.session_state.summary_pdf_path = None
+
+        doc_title = st.text_input("Document Title:", placeholder="Enter a title for your summary")
+
+        if st.button("Generate Summary", key="gen_summary_btn"):
+            with st.spinner("Generating comprehensive summary of your document..."):
+                # Generate summary and PDF
+                summary_text, pdf_path = summarize_document(
+                    st.session_state.vector_db, 
+                    doc_title=doc_title if doc_title else "Document Summary"
+                )
+
+                st.session_state.summary = summary_text
+                st.session_state.summary_pdf_path = pdf_path
+                
+                st.toast("Summary generated successfully!", icon="✅")
+
+        # Display summary and PDF if they exist
+        if st.session_state.summary and st.session_state.summary_pdf_path:
+            # PDF preview & download
+            st.subheader("PDF Summary", divider="gray")
+            
+            with open(st.session_state.summary_pdf_path, "rb") as f:
+                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+            
+            # Display PDF
+            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="500" type="application/pdf"></iframe>'
+            st.markdown(pdf_display, unsafe_allow_html=True)
+
+        else:
+            st.info("Click 'Generate Summary' to create a summary PDF from your notes!")
