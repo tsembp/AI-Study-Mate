@@ -31,8 +31,8 @@
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/yourusername/ai-study-mate
-cd ai-study-mate
+git clone https://github.com/tsembp/AI-Study-Mate
+cd AI-Study-Mate
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
